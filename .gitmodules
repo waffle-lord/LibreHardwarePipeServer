@@ -1,0 +1,3 @@
+[submodule "LibreHardwareHelper"]
+	path = LibreHardwareHelper
+	url = https://github.com/waffle-lord/LibreHardwareHelper.git
