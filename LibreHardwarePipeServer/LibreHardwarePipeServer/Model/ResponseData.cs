@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+﻿using Newtonsoft.Json;
 
 namespace LibreHardwarePipeServer.Model
 {
@@ -23,7 +23,7 @@ namespace LibreHardwarePipeServer.Model
         {
             try
             {
-                return JsonSerializer.Serialize(this);
+                return JsonConvert.SerializeObject(this, new JsonSerializerSettings { Formatting = Formatting.Indented });
             }
             catch
             {

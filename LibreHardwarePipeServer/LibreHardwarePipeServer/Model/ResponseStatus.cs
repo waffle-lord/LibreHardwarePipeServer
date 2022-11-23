@@ -2,7 +2,7 @@
 {
     public enum ResponseStatus
     {
-        OK = 0,
-        ERROR = 1
+        OK = 1,
+        ERROR = -1
     }
 }

@@ -1,4 +1,5 @@
 using LibreHardwarePipeServer;
+using PipeServerTests.Model;
 using System.IO.Pipes;
 
 namespace PipeServerTests
@@ -7,7 +8,6 @@ namespace PipeServerTests
     public class DataTests
     {
         static HardwarePipeServer server;
-        static NamedPipeClientStream client;
 
         const string _name = "hwtesting";
 
@@ -15,29 +15,58 @@ namespace PipeServerTests
         public static void Setup(TestContext context)
         {
             server = new HardwarePipeServer(_name);
-            client = new NamedPipeClientStream(_name);
 
-            Task.Run(async() =>
-            {
-                await server.RunAsync();
-            });
-
-            client.Connect();
-            client.ReadMode = PipeTransmissionMode.Byte;
+            server.StartAsync();
         }
 
         [TestMethod]
         public void GetCpuDataTest()
         {
-            using var sw = new StreamWriter(client);
-            using var sr = new StreamReader(client);
+            string data = "";
 
-            sw.Write("cpu");
-            sw.Flush();
+            try
+            {
+                using (var client = new TestPipeClient(_name))
+                {
+                    data = client.SendRequest("cpu");
 
-            var data = sr.ReadToEnd();
+                    Assert.IsTrue(data != null && data != "");
+
+                    Console.WriteLine(data);
+                }
+            }
+            catch
+            {
+                Console.WriteLine("disconnect");
+            }
 
             Console.WriteLine(data);
+        }
+
+        [TestMethod]
+        public void MultiRequestTest()
+        {
+            string data = "";
+
+            try
+            {
+                using (var client = new TestPipeClient(_name))
+                {
+                    data = client.SendRequest("cpu");
+
+                    Assert.IsTrue(data != null && data != "");
+
+                    data = "";
+
+                    client.SendRequest("cpu");
+
+                    Assert.IsTrue(data != null && data != "");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("disconnected");
+            }
         }
     }
 }

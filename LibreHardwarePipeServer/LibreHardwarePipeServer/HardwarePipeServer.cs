@@ -1,55 +1,80 @@
 ﻿using LibreHardwarePipeServer.Handlers;
 using LibreHardwarePipeServer.Interfaces;
-using System.Globalization;
 using System.IO.Pipes;
 using System.Text;
-using System.Text.Unicode;
 
 namespace LibreHardwarePipeServer
 {
-    
+
     public class HardwarePipeServer
     {
-        private NamedPipeServerStream pipeStream;
+        private string _name;
 
-        IResponseHandler _responseHanlder;
+        private bool _running = false;
+
+        private CancellationTokenSource _cancelSource = new CancellationTokenSource();
+
+        private IResponseHandler _responseHanlder;
 
         public HardwarePipeServer(string name, IResponseHandler? handler = null)
         {
             _responseHanlder = handler ?? new DefaultResponseHandler();
 
-            pipeStream = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte);
+            _name = name;
         }
 
-        public async Task RunAsync()
+        private async Task HandleConnection()
         {
+            var pipeStream = new NamedPipeServerStream(_name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte);
+
             await pipeStream.WaitForConnectionAsync();
 
-            while (true)
+            _ = Task.Factory.StartNew(async() =>
             {
-                await ReadDataAsync();
+                await HandleConnection();
+            });
+
+            while (pipeStream.IsConnected)
+            {
+                await ReadDataAsync(pipeStream);
             }
+
+            pipeStream.Close();
         }
 
-        public async Task ReadDataAsync()
+        public void StartAsync()
+        {
+            _running = true;
+
+            Task.Factory.StartNew(async() =>
+            {
+                while (_running)
+                {
+                    await HandleConnection();
+                }
+            }, _cancelSource.Token);
+        }
+
+        public void StopAsync()
+        {
+            _running = false;
+
+            _cancelSource.Cancel();
+        }
+
+        private async Task ReadDataAsync(NamedPipeServerStream pipeStream)
         {
             try
             {
-                int read = -2;
-                int index = 0;
-                byte[] buffer = new byte[10];
+                byte[] buffer = new byte[10]; // TODO - re-write this
 
-                while (index < buffer.Length || read == 0 || read == -1) // I hate buffers, this is WIP -waffle
-                {
-                    read = pipeStream.ReadByte();
-                    buffer[index++] = (byte)read;
-                }
+                var len = pipeStream.Read(buffer, 0, buffer.Length);
 
-                var dataString = UTF8Encoding.UTF8.GetString(buffer);
+                var dataString = Encoding.UTF8.GetString(buffer[0..len]);
 
                 var responseData = _responseHanlder.HandleRequest(dataString);
 
-                await WriteDataAsync(responseData);
+                await WriteDataAsync(responseData, pipeStream);
 
                 return;
             }
@@ -59,14 +84,15 @@ namespace LibreHardwarePipeServer
             }
         }
 
-        public async Task WriteDataAsync(string data)
+        private async Task WriteDataAsync(string data, NamedPipeServerStream pipeStream) //, StreamWriter sw)
         {
-            using var sw = new StreamWriter(pipeStream);
-
             try
             {
-                await sw.WriteAsync(data);
-                sw.Flush();
+                byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+
+                await pipeStream.WriteAsync(dataBytes, 0, dataBytes.Length);
+
+                await pipeStream.FlushAsync();
 
                 return;
             }
