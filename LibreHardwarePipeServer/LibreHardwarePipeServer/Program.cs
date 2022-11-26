@@ -16,7 +16,7 @@
                 name = args[1];
             }
 
-            var server = new HardwarePipeServer(name);
+            HardwareServer server = new HardwareServer();
 
             server.Start();
 

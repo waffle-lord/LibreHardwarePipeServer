@@ -6,68 +6,50 @@ namespace PipeServerTests
     [TestClass]
     public class DataTests
     {
-        static HardwarePipeServer server;
+        static HardwareServer server;
 
         const string _name = "hwtesting";
 
         [ClassInitialize]
         public static void Setup(TestContext context)
         {
-            server = new HardwarePipeServer(_name);
+            server = new HardwareServer();
 
             server.Start();
+        }
+
+        [ClassCleanup]
+        public static void Cleanup()
+        {
+            server.Stop();
         }
 
         [TestMethod]
         public void GetCpuDataTest()
         {
-            string data = "";
+            TestClient client = new TestClient();
 
-            try
-            {
-                var client = new TestPipeClient(_name);
+            var data = client.SendRequest("cpu");
 
-                data = client.SendRequest("cpu");
+            Console.WriteLine($"RESPONSE:\n{data}");
 
-                Assert.IsTrue(data != null && data != "");
-
-                Console.WriteLine(data);
-            }
-            catch
-            {
-                Console.WriteLine("disconnect");
-                Assert.Fail();
-            }
+            Assert.IsTrue(data != null && data != "");
         }
 
         [TestMethod]
         public void MultiRequestTest()
         {
-            string data = "";
+            TestClient client = new TestClient();
 
-            try
-            {
-                var client = new TestPipeClient(_name);
+            var data = client.SendRequest("cpu");
 
-                data = client.SendRequest("cpu");
+            Assert.IsTrue(data != null && data != "");
+            Console.WriteLine("Response 1 seems OK");
 
-                Assert.IsTrue(data != null && data != "");
+            data = client.SendRequest("memory");
 
-                Console.WriteLine("Request 1 Has Data");
-
-                data = "";
-
-                data = client.SendRequest("cpu");
-
-                Assert.IsTrue(data != null && data != "");
-
-                Console.WriteLine("Request 2 Has Data");
-            }
-            catch
-            {
-                Console.WriteLine("disconnected");
-                Assert.Fail();
-            }
+            Assert.IsTrue(data != null && data != "");
+            Console.WriteLine("Response 2 seems OK");
         }
     }
 }
