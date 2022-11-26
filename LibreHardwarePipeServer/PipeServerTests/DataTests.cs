@@ -1,6 +1,5 @@
 using LibreHardwarePipeServer;
 using PipeServerTests.Model;
-using System.IO.Pipes;
 
 namespace PipeServerTests
 {
@@ -16,7 +15,7 @@ namespace PipeServerTests
         {
             server = new HardwarePipeServer(_name);
 
-            server.StartAsync();
+            server.Start();
         }
 
         [TestMethod]
@@ -26,21 +25,19 @@ namespace PipeServerTests
 
             try
             {
-                using (var client = new TestPipeClient(_name))
-                {
-                    data = client.SendRequest("cpu");
+                var client = new TestPipeClient(_name);
 
-                    Assert.IsTrue(data != null && data != "");
+                data = client.SendRequest("cpu");
 
-                    Console.WriteLine(data);
-                }
+                Assert.IsTrue(data != null && data != "");
+
+                Console.WriteLine(data);
             }
             catch
             {
                 Console.WriteLine("disconnect");
+                Assert.Fail();
             }
-
-            Console.WriteLine(data);
         }
 
         [TestMethod]
@@ -50,22 +47,26 @@ namespace PipeServerTests
 
             try
             {
-                using (var client = new TestPipeClient(_name))
-                {
-                    data = client.SendRequest("cpu");
+                var client = new TestPipeClient(_name);
 
-                    Assert.IsTrue(data != null && data != "");
+                data = client.SendRequest("cpu");
 
-                    data = "";
+                Assert.IsTrue(data != null && data != "");
 
-                    client.SendRequest("cpu");
+                Console.WriteLine("Request 1 Has Data");
 
-                    Assert.IsTrue(data != null && data != "");
-                }
+                data = "";
+
+                data = client.SendRequest("cpu");
+
+                Assert.IsTrue(data != null && data != "");
+
+                Console.WriteLine("Request 2 Has Data");
             }
             catch
             {
                 Console.WriteLine("disconnected");
+                Assert.Fail();
             }
         }
     }

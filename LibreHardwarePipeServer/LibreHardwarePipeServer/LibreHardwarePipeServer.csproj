@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\LibreHardwareHelper\LibreHardwareHelper\LibreHardwareHelper\LibreHardwareHelper.csproj" />
+    <ProjectReference Include="..\..\LibreHardwareHelper\LibreHardwareHelper\LibreHardwareHelper\LibreHardwareHelper.csproj" />
   </ItemGroup>
 
 </Project>

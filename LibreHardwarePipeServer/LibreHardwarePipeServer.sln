@@ -5,9 +5,9 @@ VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibreHardwarePipeServer", "LibreHardwarePipeServer\LibreHardwarePipeServer.csproj", "{0C53871A-9BD0-49AC-B282-8D50ADD3B9F1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibreHardwareHelper", "..\..\LibreHardwareHelper\LibreHardwareHelper\LibreHardwareHelper\LibreHardwareHelper.csproj", "{B72EB2A3-E8CB-4155-AA75-C536640DC9C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PipeServerTests", "PipeServerTests\PipeServerTests.csproj", "{3E3B3F42-FDD0-418C-888A-7BD302F9D3B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipeServerTests", "PipeServerTests\PipeServerTests.csproj", "{3E3B3F42-FDD0-418C-888A-7BD302F9D3B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibreHardwareHelper", "..\LibreHardwareHelper\LibreHardwareHelper\LibreHardwareHelper\LibreHardwareHelper.csproj", "{16D13B0B-DE94-49D2-820B-8EAEFF75FCD0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +19,14 @@ Global
 		{0C53871A-9BD0-49AC-B282-8D50ADD3B9F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C53871A-9BD0-49AC-B282-8D50ADD3B9F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C53871A-9BD0-49AC-B282-8D50ADD3B9F1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B72EB2A3-E8CB-4155-AA75-C536640DC9C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B72EB2A3-E8CB-4155-AA75-C536640DC9C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B72EB2A3-E8CB-4155-AA75-C536640DC9C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B72EB2A3-E8CB-4155-AA75-C536640DC9C8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3E3B3F42-FDD0-418C-888A-7BD302F9D3B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3E3B3F42-FDD0-418C-888A-7BD302F9D3B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E3B3F42-FDD0-418C-888A-7BD302F9D3B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E3B3F42-FDD0-418C-888A-7BD302F9D3B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16D13B0B-DE94-49D2-820B-8EAEFF75FCD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16D13B0B-DE94-49D2-820B-8EAEFF75FCD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16D13B0B-DE94-49D2-820B-8EAEFF75FCD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16D13B0B-DE94-49D2-820B-8EAEFF75FCD0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

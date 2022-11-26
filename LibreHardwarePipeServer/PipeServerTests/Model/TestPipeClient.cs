@@ -3,50 +3,76 @@ using System.Text;
 
 namespace PipeServerTests.Model
 {
-    internal class TestPipeClient : IDisposable
+    internal class TestPipeClient
     {
-        private NamedPipeClientStream _client;
+        private string _name;
+
         public TestPipeClient(string name)
         {
-            _client = new NamedPipeClientStream(name);
-
-            _client.Connect();
+            _name = name;
         }
 
         public string SendRequest(string request)
         {
-            Send(request);
-            return Receive();
+            var client = new NamedPipeClientStream("localhost", _name, PipeDirection.InOut, PipeOptions.Asynchronous);
+
+            try
+            {
+                client.Connect(2000);
+            }
+            catch(Exception ex)
+            {
+                return ex.Message;
+            }
+
+            Send(client, request);
+            return Receive(client);
         }
 
-        private void Send(string data)
+        private void Send(NamedPipeClientStream client, string data)
         {
             byte[] byteData = Encoding.UTF8.GetBytes(data);
 
-            _client.Write(byteData, 0, byteData.Length);
+            client.Write(byteData, 0, byteData.Length);
 
-            _client.Flush();
+            client.Flush();
         }
 
-        private string Receive()
+        private string Receive(NamedPipeClientStream client)
         {
-            throw new NotImplementedException();
+            var data = new List<byte>();
 
-            byte[] data = new byte[] { };
-
-            var buffer = new byte[1024];
-
-            while () // TODO - finish this lol -waffle
+            using (var keepAliveSource = new KeepAliveTokenSource(100))
             {
-                var len = _client.Read(buffer, 0, buffer.Length);
+                keepAliveSource.TokenCancelled += (s, e) =>
+                {
+                    client.Close();
+                };
+
+                while (!keepAliveSource.IsCancelled)
+                {
+                    try
+                    {
+                        int b = client.ReadByte();
+
+                        if (b == 0 || b == -1)
+                        {
+                            keepAliveSource.Kill();
+                            break;
+                        }
+
+                        data.Add((byte)b);
+
+                        keepAliveSource.KeepAlive();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
             }
 
-            //return Encoding.UTF8.GetString(buffer[0..len]);
-        }
-
-        public void Dispose()
-        {
-            _client.Dispose();
+            return Encoding.UTF8.GetString(data.ToArray());
         }
     }
 }

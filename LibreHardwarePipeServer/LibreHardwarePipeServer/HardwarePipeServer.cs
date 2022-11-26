@@ -42,7 +42,7 @@ namespace LibreHardwarePipeServer
             pipeStream.Close();
         }
 
-        public void StartAsync()
+        public void Start()
         {
             _running = true;
 

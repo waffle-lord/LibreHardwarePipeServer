@@ -18,7 +18,7 @@
 
             var server = new HardwarePipeServer(name);
 
-            server.StartAsync();
+            server.Start();
 
             await Task.Delay(-1);
         }
