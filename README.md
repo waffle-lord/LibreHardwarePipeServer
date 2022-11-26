@@ -1,2 +1,2 @@
-# LibreHardwarePipeServer
-A named pipe server implementation of LibreHardwareHelper
+# LibreHardwareServer
+A simple TCP server implementation of LibreHardwareHelper
