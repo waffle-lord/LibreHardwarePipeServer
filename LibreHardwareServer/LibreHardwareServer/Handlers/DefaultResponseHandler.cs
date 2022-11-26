@@ -1,8 +1,8 @@
 ﻿using LibreHardware_Helper;
-using LibreHardwarePipeServer.Interfaces;
-using LibreHardwarePipeServer.Model;
+using LibreHardwareServer.Interfaces;
+using LibreHardwareServer.Model;
 
-namespace LibreHardwarePipeServer.Handlers
+namespace LibreHardwareServer.Handlers
 {
     internal class DefaultResponseHandler : IResponseHandler
     {

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace LibreHardwarePipeServer.Model
+namespace LibreHardwareServer.Model
 {
     public class ResponseData
     {

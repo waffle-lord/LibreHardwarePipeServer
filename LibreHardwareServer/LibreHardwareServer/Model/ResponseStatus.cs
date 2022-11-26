@@ -1,4 +1,4 @@
-﻿namespace LibreHardwarePipeServer.Model
+﻿namespace LibreHardwareServer.Model
 {
     public enum ResponseStatus
     {

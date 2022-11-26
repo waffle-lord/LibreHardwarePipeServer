@@ -1,6 +1,6 @@
-﻿using LibreHardwarePipeServer.Model;
+﻿using LibreHardwareServer.Model;
 
-namespace LibreHardwarePipeServer.Interfaces
+namespace LibreHardwareServer.Interfaces
 {
     public interface IResponseHandler
     {

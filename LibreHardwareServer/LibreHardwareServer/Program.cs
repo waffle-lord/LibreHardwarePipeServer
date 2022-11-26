@@ -1,4 +1,4 @@
-﻿namespace LibreHardwarePipeServer
+﻿namespace LibreHardwareServer
 {
     class Program
     {

@@ -1,10 +1,10 @@
-﻿using LibreHardwarePipeServer.Handlers;
-using LibreHardwarePipeServer.Interfaces;
+﻿using LibreHardwareServer.Handlers;
+using LibreHardwareServer.Interfaces;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace LibreHardwarePipeServer
+namespace LibreHardwareServer
 {
     public class HardwareServer
     {

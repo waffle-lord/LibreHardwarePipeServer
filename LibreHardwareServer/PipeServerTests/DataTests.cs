@@ -1,4 +1,4 @@
-using LibreHardwarePipeServer;
+using LibreHardwareServer;
 using PipeServerTests.Model;
 
 namespace PipeServerTests
