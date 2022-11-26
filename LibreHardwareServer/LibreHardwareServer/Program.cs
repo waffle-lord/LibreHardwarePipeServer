@@ -9,16 +9,13 @@
 
         static async Task MainAsync(string[] args)
         {
-            string name = "librehwpipe";
-
-            if (args.Length == 2 && args[0].ToLower() == "--name")
-            {
-                name = args[1];
-            }
-
             HardwareServer server = new HardwareServer();
 
+            Console.WriteLine("Starting Server ...");
+
             server.Start();
+
+            Console.WriteLine("Waiting for connections ...");
 
             await Task.Delay(-1);
         }

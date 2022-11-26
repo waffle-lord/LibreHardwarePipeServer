@@ -8,6 +8,8 @@ namespace LibreHardwareServer
 {
     public class HardwareServer
     {
+        private IPAddress _address = IPAddress.Parse("127.0.0.1");
+        private int _port = 22528;
         private bool _running;
         private IResponseHandler _responseHandler;
         private CancellationTokenSource _cancelSource;
@@ -22,7 +24,7 @@ namespace LibreHardwareServer
         public void Start()
         {
             _running = true;
-            TcpListener tcplistener = new TcpListener(IPAddress.Parse("127.0.0.1"), 12345);
+            TcpListener tcplistener = new TcpListener(_address, _port);
             tcplistener.Start();
 
             Task.Factory.StartNew(async () =>

@@ -5,10 +5,17 @@ namespace PipeServerTests.Model
 {
     internal class TestClient
     {
-        public string SendRequest(string message)
-        {
-            TcpClient client = new TcpClient("127.0.0.1", 12345);
+        protected int _port = 22528;
+        protected string _address = "127.0.0.1";
 
+        public virtual string SendRequest(string message)
+        {
+            TcpClient client = new TcpClient(_address, _port);
+            return Send(client, message);
+        }
+
+        protected string Send(TcpClient client, string message)
+        {
             Stream stream = client.GetStream();
 
             byte[] data = Encoding.ASCII.GetBytes(message.ToString() + ((char)1));
