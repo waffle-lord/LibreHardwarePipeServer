@@ -10,6 +10,7 @@ namespace PipeServerTests.Model
 
         public virtual string SendRequest(string message)
         {
+            // TODO - configure/test keepalive
             TcpClient client = new TcpClient(_address, _port);
             return Send(client, message);
         }

@@ -1,6 +1,7 @@
 using LibreHardwareServer;
 using Newtonsoft.Json.Linq;
 using PipeServerTests.Model;
+using System.Threading.Tasks;
 
 namespace PipeServerTests
 {
@@ -101,7 +102,7 @@ namespace PipeServerTests
 
             for (int i = 0; i < 10; i++)
             {
-                clients.Add(new DelayedTestClient());
+                clients.Add(new DelayedTestClient(TimeSpan.FromSeconds(2)));
             }
 
             foreach(var client in clients)
