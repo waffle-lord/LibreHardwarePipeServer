@@ -8,7 +8,7 @@ namespace LibreHardwareServer.Interfaces
         /// Handle the incomming request from the pipe client
         /// </summary>
         /// <param name="message"></param>
-        /// <returns>The requested response as a json string</returns>
+        /// <returns></returns>
         public ResponseData HandleRequest(string message);
     }
 }
