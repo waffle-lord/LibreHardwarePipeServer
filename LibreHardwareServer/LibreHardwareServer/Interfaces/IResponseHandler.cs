@@ -9,6 +9,6 @@ namespace LibreHardwareServer.Interfaces
         /// </summary>
         /// <param name="message"></param>
         /// <returns>The requested response as a json string</returns>
-        public string HandleRequest(string message);
+        public ResponseData HandleRequest(string message);
     }
 }

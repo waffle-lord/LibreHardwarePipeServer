@@ -7,10 +7,13 @@ namespace LibreHardwareServer.Model
         public ResponseStatus Status { get; set; }
         public object Data { get; set; }
 
+        [JsonIgnore]
+        public string SerializedData { get; private set; }
+
         public ResponseData(object data)
         {
             Data = data ?? "Failed to get data";
-            Status = data != null ? ResponseStatus.OK : ResponseStatus.ERROR;
+            Status = data != null ? ResponseStatus.OK : ResponseStatus.Error;
         }
 
         public ResponseData WithStatus(ResponseStatus status)
@@ -19,15 +22,21 @@ namespace LibreHardwareServer.Model
             return this;
         }
 
-        public string? Serialize()
+        public string Serialize(string failedToSerializeMessage = "Serialization failed")
         {
             try
             {
-                return JsonConvert.SerializeObject(this, new JsonSerializerSettings { Formatting = Formatting.Indented });
+                var serialized = JsonConvert.SerializeObject(this, new JsonSerializerSettings { Formatting = Formatting.Indented });
+                SerializedData = serialized;
+                return SerializedData;
             }
             catch
             {
-                return null;
+                Data = failedToSerializeMessage;
+                Status = ResponseStatus.Error;
+                var serialized = JsonConvert.SerializeObject(this, new JsonSerializerSettings { Formatting = Formatting.Indented });
+                SerializedData = serialized;
+                return SerializedData;
             }
         }
     }

@@ -13,61 +13,35 @@ namespace LibreHardwareServer.Handlers
             _helper = new LibreHardwareHelper();
         }
 
-        public string HandleRequest(string message)
+        public ResponseData HandleRequest(string message)
         {
             switch(message)
             {
                 case "cpu":
                     {
-                        return GetCpuDataResponse();
+                        return new ResponseData(_helper.GetCpuData());
                     }
                 case "memory":
                     {
-                        return GetMemoryDataResponse();
+                        return new ResponseData(_helper.GetMemoryData());
                     }
                 case "gpu":
                     {
-                        return GetGpuDataResponse();
+                        return new ResponseData(_helper.GetGpuData());
+                    }
+                case "ping":
+                    {
+                        return new ResponseData("pong");
+                    }
+                case "close":
+                    {
+                        return new ResponseData("goodbye").WithStatus(ResponseStatus.Closing);
                     }
                 default:
                     {
-                        return GetResponseData("Invalid Request");
+                        return new ResponseData("Invalid Request").WithStatus(ResponseStatus.Error);
                     }
             }
-        }
-
-        private string GetResponseData(object data)
-        {
-            var response = new ResponseData(data).Serialize();
-
-            if (response == null)
-            {
-                var error = new ResponseData("Failed to serialize data").WithStatus(ResponseStatus.ERROR).Serialize();
-
-                if (error == null)
-                {
-                    return "unknown error";
-                }
-
-                return error;
-            }
-
-            return response;
-        }
-
-        private string GetCpuDataResponse()
-        {
-            return GetResponseData(_helper.GetCpuData());
-        }
-
-        private string GetMemoryDataResponse()
-        {
-            return GetResponseData(_helper.GetMemoryData());
-        }
-
-        private string GetGpuDataResponse()
-        {
-            return GetResponseData(_helper.GetGpuData());
         }
     }
 }
