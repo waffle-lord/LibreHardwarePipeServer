@@ -11,11 +11,7 @@
         {
             HardwareServer server = new HardwareServer();
 
-            Console.WriteLine("Starting Server ...");
-
             server.Start();
-
-            Console.WriteLine("Waiting for connections ...");
 
             await Task.Delay(-1);
         }

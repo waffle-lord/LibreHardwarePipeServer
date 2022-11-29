@@ -1,8 +1,8 @@
 ﻿using LibreHardwareServer.Handlers;
 using LibreHardwareServer.Interfaces;
+using LibreHardwareServer.Model;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 
 namespace LibreHardwareServer
 {
@@ -15,13 +15,29 @@ namespace LibreHardwareServer
         private CancellationTokenSource _cancelSource;
         private bool _notifiedMaxConnected = false;
 
+        private System.Timers.Timer _keepAliveTimer = new System.Timers.Timer(TimeSpan.FromSeconds(3).TotalMilliseconds);
+
         int maxConnections = 20;
-        Dictionary<int, TcpClient> connections = new Dictionary<int, TcpClient>();
+        private List<TcpConnection> _connections = new List<TcpConnection>();
 
         public HardwareServer(IResponseHandler handler = null)
         {
             _cancelSource = new CancellationTokenSource();
             _responseHandler = handler ?? new DefaultResponseHandler();
+
+            _keepAliveTimer.Elapsed += _keepAliveTimer_Elapsed;
+
+            _keepAliveTimer.Start();
+        }
+
+        private void _keepAliveTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            var closableConnections = _connections.Where(x => x.LastResponseTime.AddMinutes(1) < DateTime.Now).ToList();
+
+            foreach(var connection in closableConnections)
+            {
+                RemoveConnection(connection);
+            }
         }
 
         private Func<int, string> clientTag = (id) => $"Conn#{id}";
@@ -31,14 +47,14 @@ namespace LibreHardwareServer
             Console.WriteLine($"[{tag}]: {message}");
         }
 
-        private int AddClient(TcpClient client)
+        private int AddConnection(TcpClient client)
         {
             for (int i = 0; i < maxConnections; i++)
             {
-                if (!connections.ContainsKey(i))
+                if (!_connections.Any(x => x.Id == i))
                 {
+                    _connections.Add(new TcpConnection(i, client));
                     Output(clientTag(i), "Connected");
-                    connections.Add(i, client);
                     return i;
                 }
             }
@@ -47,17 +63,23 @@ namespace LibreHardwareServer
             return -1;
         }
 
-        private void RemoveClient(int clientId)
+        private void RemoveConnection(TcpConnection connection)
         {
-            if(connections.ContainsKey(clientId))
+            connection.Close();
+
+            if(_connections.Contains(connection))
             {
-                connections.Remove(clientId);
-                Output(clientTag(clientId), "Closed");
+                _connections.Remove(connection);
+                Output(clientTag(connection.Id), "Closed");
             }
         }
 
         public void Start()
         {
+            if (_running) return;
+
+            Output("Server", "Starting up ...");
+
             _running = true;
             TcpListener tcplistener = new TcpListener(_address, _port);
             tcplistener.Start();
@@ -66,22 +88,22 @@ namespace LibreHardwareServer
             {
                 while (_running)
                 {
-                    if (connections.Count >= maxConnections)
+                    if (_connections.Count >= maxConnections)
                     {
                         if (!_notifiedMaxConnected)
                         {
                             _notifiedMaxConnected = true;
-                            Output("Server", $"-- Max connections Reached --\n >> Connections: {connections.Count}/{maxConnections}");
+                            Output("Server", $"-- Max connections Reached --\n >> Connections: {_connections.Count}/{maxConnections}");
                         }
 
                         continue;
                     }
 
-                    int clientId = AddClient(await tcplistener.AcceptTcpClientAsync());
+                    int clientId = AddConnection(await tcplistener.AcceptTcpClientAsync());
 
                     if (clientId == -1)
                     {
-                        Output("Server", $"Failed to add client\n >> Connections: {connections.Count}/{maxConnections}");
+                        Output("Server", $"Failed to add client\n >> Connections: {_connections.Count}/{maxConnections}");
                         continue;
                     }
 
@@ -93,53 +115,54 @@ namespace LibreHardwareServer
                     });
                 }
             }, _cancelSource.Token);
+
+            Output("Server", "Started. Waiting for connections");
         }
 
         public void Stop()
         {
+            Output("Server", "Shutting down ...");
+
             _running = false;
             _cancelSource.Cancel();
+            
+            foreach(var connection in _connections)
+            {
+                RemoveConnection(connection);
+            }
+
+            Output("Server", "Server Stopped");
         }
 
         private void HandleConnectionReceived(int clientId)
         {
-            TcpClient client;
+            var connection = _connections.FirstOrDefault(x => x.Id == clientId);
 
-            if (connections.ContainsKey(clientId))
-            {
-                client = connections[clientId];
-            }
-            else
+            if (connection == null)
             {
                 Output("Server", $"Failed to find client with ID: {clientId}");
                 return;
             }
 
-            Stream stream = client.GetStream();
-
-            List<byte> bytes = new List<byte>();
-            int byteValue;
-
-            while ((byteValue = stream.ReadByte()) != 1)
+            while (connection.IsConnected)
             {
-                bytes.Add((byte)byteValue);
+                var message = connection.Receive();
+
+                Output(clientTag(clientId), $"<- Recv: {message}");
+
+                var response = _responseHandler.HandleRequest(message);
+
+                connection.Send(response.Serialize());
+
+                Output(clientTag(clientId), $"-> Responded");
+
+                if (response.Status == ResponseStatus.Closing)
+                {
+                    connection.Close();
+                }
             }
 
-            string message = Encoding.ASCII.GetString(bytes.ToArray(), 0, bytes.Count);
-
-            Output(clientTag(clientId), $"<- Recv: {message}");
-
-            var response = _responseHandler.HandleRequest(message);
-
-            byte[] data = Encoding.ASCII.GetBytes(response + ((char)1));
-
-            stream.Write(data, 0, data.Length);
-
-            Output(clientTag(clientId), $"-> Responded");
-
-            client.Close();
-
-            RemoveClient(clientId);
+            RemoveConnection(connection);
         }
     }
 }
