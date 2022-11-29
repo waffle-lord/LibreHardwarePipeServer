@@ -23,13 +23,32 @@ namespace PipeServerTests
             server.Stop();
         }
 
-        private bool CheckStatus(string json)
+        private bool CheckStatus(string json, ref string statusMessage)
         {
             try
             {
                 if (json == null || json == "") return false;
 
-                return JObject.Parse(json)["Status"].Value<int>() == 1;
+                int status = JObject.Parse(json)["Status"].Value<int>();
+
+                switch (status)
+                {
+                    case 1:
+                        {
+                            statusMessage = "OK";
+                            return true;
+                        }
+                    case 0:
+                        {
+                            statusMessage = "Error";
+                            return false;
+                        }
+                    default:
+                        {
+                            statusMessage = "Unknown";
+                            return false;
+                        }
+                }
             }
             catch(Exception ex)
             {
@@ -52,9 +71,11 @@ namespace PipeServerTests
 
             client.Close();
 
-            Assert.IsTrue(shouldFail ? !CheckStatus(data) : CheckStatus(data));
+            string status = "";
 
-            Console.WriteLine("Response is OK");
+            Assert.IsTrue(shouldFail ? !CheckStatus(data, ref status) : CheckStatus(data, ref status));
+
+            Console.WriteLine($"Response is {status}");
             Console.WriteLine($"RESPONSE:\n{data}");
         }
 
@@ -65,15 +86,17 @@ namespace PipeServerTests
 
             var data = client.SendRequest("cpu");
 
-            Assert.IsTrue(CheckStatus(data));
-            Console.WriteLine("Response 1 is OK");
+            string status = "";
+
+            Assert.IsTrue(CheckStatus(data, ref status));
+            Console.WriteLine($"Response 1 is {status}");
 
             data = client.SendRequest("memory");
 
             client.Close();
 
-            Assert.IsTrue(CheckStatus(data));
-            Console.WriteLine("Response 2 is OK");
+            Assert.IsTrue(CheckStatus(data, ref status));
+            Console.WriteLine($"Response 2 is {status}");
         }
 
         [TestMethod]
@@ -106,9 +129,11 @@ namespace PipeServerTests
 
             Assert.IsTrue(responses.Count == 10);
 
+            string status = "";
+
             foreach (var response in responses)
             {
-                Assert.IsTrue(CheckStatus(response));
+                Assert.IsTrue(CheckStatus(response, ref status));
             }
 
             Console.WriteLine("All Responses OK");
@@ -121,7 +146,9 @@ namespace PipeServerTests
 
             var data = client.SendRequest("ping");
 
-            Assert.IsTrue(CheckStatus(data));
+            string status = "";
+
+            Assert.IsTrue(CheckStatus(data, ref status));
 
             Console.WriteLine("Connected");
 
@@ -129,7 +156,7 @@ namespace PipeServerTests
 
             data = client.SendRequest("ping");
 
-            Assert.IsTrue(CheckStatus(data));
+            Assert.IsTrue(CheckStatus(data, ref status));
 
             Console.WriteLine("10secs - Still Connected");
 
@@ -137,7 +164,7 @@ namespace PipeServerTests
 
             data = client.SendRequest("ping");
 
-            Assert.IsTrue(CheckStatus(data));
+            Assert.IsTrue(CheckStatus(data, ref status));
 
             Console.WriteLine("50secs - Still Connected");
 
