@@ -5,7 +5,7 @@ VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibreHardwareServer", "LibreHardwareServer\LibreHardwareServer.csproj", "{0C53871A-9BD0-49AC-B282-8D50ADD3B9F1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PipeServerTests", "PipeServerTests\PipeServerTests.csproj", "{3E3B3F42-FDD0-418C-888A-7BD302F9D3B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerTests", "ServerTests\ServerTests.csproj", "{3E3B3F42-FDD0-418C-888A-7BD302F9D3B4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibreHardwareHelper", "..\LibreHardwareHelper\LibreHardwareHelper\LibreHardwareHelper\LibreHardwareHelper.csproj", "{16D13B0B-DE94-49D2-820B-8EAEFF75FCD0}"
 EndProject
