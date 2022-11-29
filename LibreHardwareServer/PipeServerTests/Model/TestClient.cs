@@ -3,38 +3,52 @@ using System.Text;
 
 namespace PipeServerTests.Model
 {
-    internal class TestClient
+    internal class TestClient : IDisposable
     {
         protected int _port = 22528;
         protected string _address = "127.0.0.1";
+        private TcpClient _client;
+        private Stream _ioStream;
 
-        public virtual string SendRequest(string message)
+        public TestClient()
         {
-            // TODO - configure/test keepalive
-            TcpClient client = new TcpClient(_address, _port);
-            return Send(client, message);
+            _client = new TcpClient(_address, _port);
+            _ioStream = _client.GetStream();
         }
 
-        protected string Send(TcpClient client, string message)
+        public string SendRequest(string message)
         {
-            Stream stream = client.GetStream();
-
             byte[] data = Encoding.ASCII.GetBytes(message.ToString() + ((char)1));
-            stream.Write(data, 0, data.Length);
+            _ioStream.Write(data, 0, data.Length);
 
             List<byte> bytes = new List<byte>();
             int byteValue;
 
-            while ((byteValue = stream.ReadByte()) != 1)
+            while ((byteValue = _ioStream.ReadByte()) != 1)
             {
                 bytes.Add((byte)byteValue);
             }
 
             var response = Encoding.ASCII.GetString(bytes.ToArray(), 0, bytes.Count);
 
-            client.Close();
-
             return response;
+        }
+
+        public void Close()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                SendRequest("close");
+            }
+            catch { } // connection is most likely closed if this throws, just continue
+
+            _ioStream.Close();
+            _client.Close();
         }
     }
 }

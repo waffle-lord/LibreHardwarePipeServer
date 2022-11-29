@@ -1,7 +1,6 @@
 using LibreHardwareServer;
 using Newtonsoft.Json.Linq;
 using PipeServerTests.Model;
-using System.Threading.Tasks;
 
 namespace PipeServerTests
 {
@@ -47,6 +46,8 @@ namespace PipeServerTests
 
             var data = client.SendRequest("cpu");
 
+            client.Close();
+
             Assert.IsTrue(CheckStatus(data));
             Console.WriteLine("Response is OK");
             Console.WriteLine($"RESPONSE:\n{data}");
@@ -58,6 +59,8 @@ namespace PipeServerTests
             TestClient client = new TestClient();
 
             var data = client.SendRequest("memory");
+
+            client.Close();
 
             Assert.IsTrue(CheckStatus(data));
             Console.WriteLine("Response is OK");
@@ -71,6 +74,8 @@ namespace PipeServerTests
             TestClient client = new TestClient();
 
             var data = client.SendRequest("gpu");
+
+            client.Close();
 
             Assert.IsTrue(CheckStatus(data));
             Console.WriteLine("Response is OK");
@@ -89,8 +94,25 @@ namespace PipeServerTests
             Console.WriteLine("Response 1 is OK");
 
             data = client.SendRequest("memory");
+
+            client.Close();
+
             Assert.IsTrue(CheckStatus(data));
             Console.WriteLine("Response 2 is OK");
+        }
+
+        [TestMethod]
+        public void InvalidRequestTest()
+        {
+            TestClient client = new TestClient();
+
+            var data = client.SendRequest("lskdjflsjdflksj");
+
+            client.Close();
+
+            Assert.IsFalse(CheckStatus(data));
+
+            Console.WriteLine($"RESPONSE:\n{data}");
         }
 
         [TestMethod]
@@ -98,22 +120,26 @@ namespace PipeServerTests
         {
             List<Task> tasks = new List<Task>();
             List<string> responses = new List<string>();
-            List<DelayedTestClient> clients = new List<DelayedTestClient>();
+            List<TestClient> clients = new List<TestClient>();
 
             for (int i = 0; i < 10; i++)
             {
-                clients.Add(new DelayedTestClient(TimeSpan.FromSeconds(2)));
+                clients.Add(new TestClient());
             }
 
             foreach(var client in clients)
             {
                 tasks.Add(Task.Factory.StartNew(() =>
                 {
+                    Thread.Sleep(2000);
+
                     responses.Add(client.SendRequest("cpu"));
+
+                    client.Close();
                 }));
             }
 
-            Task.WaitAll(tasks.ToArray(), TimeSpan.FromSeconds(30));
+            Task.WaitAll(tasks.ToArray(), TimeSpan.FromSeconds(60));
 
             Console.WriteLine($"{responses.Count} responses recieved");
 
@@ -125,6 +151,42 @@ namespace PipeServerTests
             }
 
             Console.WriteLine("All Responses OK");
+        }
+
+        [TestMethod]
+        public async Task TimeoutTest()
+        {
+            var client = new TestClient();
+
+            var data = client.SendRequest("ping");
+
+            Assert.IsTrue(CheckStatus(data));
+
+            Console.WriteLine("Connected");
+
+            await Task.Delay(10 * 1000);
+
+            data = client.SendRequest("ping");
+
+            Assert.IsTrue(CheckStatus(data));
+
+            Console.WriteLine("10secs - Still Connected");
+
+            await Task.Delay(50 * 1000);
+
+            data = client.SendRequest("ping");
+
+            Assert.IsTrue(CheckStatus(data));
+
+            Console.WriteLine("50secs - Still Connected");
+
+            await Task.Delay(70 * 1000);
+
+            Console.WriteLine("1min, 10secs - Should throw exception (connection closed by server)");
+
+            Assert.ThrowsException<IOException>(() => { client.SendRequest("ping"); });
+
+            client.Close();
         }
     }
 }
