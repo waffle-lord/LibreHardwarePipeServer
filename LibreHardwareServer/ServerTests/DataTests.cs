@@ -40,47 +40,22 @@ namespace PipeServerTests
         }
 
         [TestMethod]
-        public void GetCpuDataTest()
+        [DataRow("cpu")]
+        [DataRow("memory")]
+        [DataRow("gpu")]
+        [DataRow("klsjflksjdf", true)]
+        public void GetData(string message, bool shouldFail = false)
         {
             TestClient client = new TestClient();
 
-            var data = client.SendRequest("cpu");
+            var data = client.SendRequest(message);
 
             client.Close();
 
-            Assert.IsTrue(CheckStatus(data));
+            Assert.IsTrue(shouldFail ? !CheckStatus(data) : CheckStatus(data));
+
             Console.WriteLine("Response is OK");
             Console.WriteLine($"RESPONSE:\n{data}");
-        }
-
-        [TestMethod]
-        public void GetMemoryDataTest()
-        {
-            TestClient client = new TestClient();
-
-            var data = client.SendRequest("memory");
-
-            client.Close();
-
-            Assert.IsTrue(CheckStatus(data));
-            Console.WriteLine("Response is OK");
-            Console.WriteLine($"RESPONSE:\n{data}");
-
-        }
-
-        [TestMethod]
-        public void GetGpuDataTest()
-        {
-            TestClient client = new TestClient();
-
-            var data = client.SendRequest("gpu");
-
-            client.Close();
-
-            Assert.IsTrue(CheckStatus(data));
-            Console.WriteLine("Response is OK");
-            Console.WriteLine($"RESPONSE:\n{data}");
-
         }
 
         [TestMethod]
@@ -99,20 +74,6 @@ namespace PipeServerTests
 
             Assert.IsTrue(CheckStatus(data));
             Console.WriteLine("Response 2 is OK");
-        }
-
-        [TestMethod]
-        public void InvalidRequestTest()
-        {
-            TestClient client = new TestClient();
-
-            var data = client.SendRequest("lskdjflsjdflksj");
-
-            client.Close();
-
-            Assert.IsFalse(CheckStatus(data));
-
-            Console.WriteLine($"RESPONSE:\n{data}");
         }
 
         [TestMethod]
